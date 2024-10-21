@@ -1,5 +1,6 @@
 package angelolaera.cashuboli_capstone_backend.controllers;
 
+import angelolaera.cashuboli_capstone_backend.Payloads.PrenotazioneDTO;
 import angelolaera.cashuboli_capstone_backend.entities.Prenotazione;
 import angelolaera.cashuboli_capstone_backend.entities.Utente;
 import angelolaera.cashuboli_capstone_backend.services.PrenotazioneService;
@@ -27,16 +28,11 @@ public class PrenotazioneController {
         return ResponseEntity.ok(prenotazioni);
     }
 
-    // Ottiene tutte le prenotazioni
-
-
     // Crea una nuova prenotazione
     @PostMapping
-    public ResponseEntity<Prenotazione> createPrenotazione(@RequestBody Prenotazione prenotazione, @AuthenticationPrincipal Utente utente) {
-        // Associa l'utente autenticato alla prenotazione
-        prenotazione.setUtente(utente);
+    public ResponseEntity<Prenotazione> createPrenotazione(@RequestBody PrenotazioneDTO prenotazioneDTO, @AuthenticationPrincipal Utente utente) {
         try {
-            Prenotazione nuovaPrenotazione = prenotazioneService.createPrenotazione(prenotazione);
+            Prenotazione nuovaPrenotazione = prenotazioneService.createPrenotazione(prenotazioneDTO, utente);
             return ResponseEntity.ok(nuovaPrenotazione);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);

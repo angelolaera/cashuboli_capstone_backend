@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="prenotazioni")
+@Table(name = "prenotazioni")
 @ToString
 
 @Entity
@@ -29,6 +29,10 @@ public class Prenotazione {
     @JoinColumn(name = "tour_id", nullable = false)
     private Tour tour;
 
+    @ManyToOne
+    @JoinColumn(name = "bicicletta_id", nullable = false)
+    private Bicicletta bicicletta;
+
     @Column(nullable = false)
     private int numeroBiciclettePrenotate;
 
@@ -38,6 +42,6 @@ public class Prenotazione {
     @Column(nullable = false)
     private BigDecimal totalePrezzo;
 
-    @Enumerated(EnumType.STRING)
-    private StatoPrenotazione stato;
+    @Enumerated(EnumType.STRING) // Aggiungi questo se non presente
+    private StatoPrenotazione stato;  // Campo stato per memorizzare lo stato della prenotazione
 }

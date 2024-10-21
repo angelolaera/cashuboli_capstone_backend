@@ -5,6 +5,8 @@ import angelolaera.cashuboli_capstone_backend.entities.Prenotazione;
 import angelolaera.cashuboli_capstone_backend.services.UtenteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,13 @@ public class UtenteController {
 
     @Autowired
     private UtenteService utenteService;
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<Utente> getAllUsers(Authentication authentication) {
+
+        return utenteService.findAll();
+    }
 
     // Visualizza le prenotazioni dell'utente autenticato
     @GetMapping("/prenotazioni")

@@ -25,7 +25,7 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
 
-                //.cors(cors -> cors.configurationSource(corsConfigurationSource()))  Abilita CORS con configurazione
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))  //Abilita CORS con configurazione
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -41,4 +41,19 @@ public class SecurityConfig {
     PasswordEncoder getBCrypt() {
         return new BCryptPasswordEncoder(11);  // Lo stesso encoder del progetto precedente
     }
+
+    // Configurazione CORS
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));  // Aggiungi il dominio del frontend
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));  // Permetti vari metodi
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));  // Permetti specifici header
+        configuration.setAllowCredentials(true);  // Permetti invio di credenziali come i cookie
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);  // Applica a tutte le rotte
+        return source;
+    }
+
 }

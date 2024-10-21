@@ -1,5 +1,6 @@
 package angelolaera.cashuboli_capstone_backend.entities;
 
+import angelolaera.cashuboli_capstone_backend.enums.TourType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,14 +22,15 @@ public class Tour {
     @Setter(AccessLevel.NONE)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String name;
+    private TourType name;
 
     @Column(nullable = false, length = 500)
     private String description;
 
     @Column(nullable = false)
-    private LocalDate date;  // Puoi anche considerare l'aggiunta di date di inizio e fine, se richiesto
+    private LocalDate date;
 
     @Column(nullable = false)
     private BigDecimal price;

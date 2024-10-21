@@ -1,7 +1,7 @@
 package angelolaera.cashuboli_capstone_backend.controllers;
-
-
 import angelolaera.cashuboli_capstone_backend.entities.Tour;
+import angelolaera.cashuboli_capstone_backend.Payloads.TourDTO;
+import angelolaera.cashuboli_capstone_backend.enums.TourType;
 import angelolaera.cashuboli_capstone_backend.services.TourService;
 import angelolaera.cashuboli_capstone_backend.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tours")
@@ -20,13 +21,22 @@ public class TourController {
 
     // Visualizza tutti i tour
     @GetMapping
-    public List<Tour> getAllTours() {
-        return tourService.getAllTours();
+    public List<TourDTO> getAllTours() {
+        return tourService.getAllTours().stream()
+                .map(tour -> new TourDTO(tour.getName(), tour.getDescription(), tour.getDate(), tour.getPrice(), tour.getMaxParticipants()))
+                .collect(Collectors.toList());
     }
 
     // Crea un nuovo tour
     @PostMapping
-    public ResponseEntity<Tour> createTour(@RequestBody Tour tour) {
+    public ResponseEntity<Tour> createTour(@RequestBody TourDTO tourDTO) {
+        Tour tour = new Tour();
+        tour.setName(tourDTO.name());
+        tour.setDescription(tourDTO.description());
+        tour.setDate(tourDTO.date());
+        tour.setPrice(tourDTO.price());
+        tour.setMaxParticipants(tourDTO.maxParticipants());
+
         Tour createdTour = tourService.createTour(tour);
         return ResponseEntity.ok(createdTour);
     }
@@ -44,9 +54,16 @@ public class TourController {
 
     // Aggiorna un tour esistente
     @PutMapping("/{id}")
-    public ResponseEntity<Tour> updateTour(@PathVariable Long id, @RequestBody Tour tourDetails) {
+    public ResponseEntity<Tour> updateTour(@PathVariable Long id, @RequestBody TourDTO tourDTO) {
         try {
-            Tour updatedTour = tourService.updateTour(id, tourDetails);
+            Tour tour = new Tour();
+            tour.setName(TourType.valueOf(String.valueOf(tourDTO.name())));
+            tour.setDescription(tourDTO.description());
+            tour.setDate(tourDTO.date());
+            tour.setPrice(tourDTO.price());
+            tour.setMaxParticipants(tourDTO.maxParticipants());
+
+            Tour updatedTour = tourService.updateTour(id, tour);
             return ResponseEntity.ok(updatedTour);
         } catch (NotFoundException ex) {
             return ResponseEntity.notFound().build();
@@ -55,10 +72,11 @@ public class TourController {
 
     // Trova tour per data
     @GetMapping("/date/{date}")
-    public ResponseEntity<List<Tour>> getToursByDate(@PathVariable String date) {
+    public ResponseEntity<List<TourDTO>> getToursByDate(@PathVariable String date) {
         LocalDate parsedDate = LocalDate.parse(date);
-        List<Tour> tours = tourService.getToursByDate(parsedDate);
+        List<TourDTO> tours = tourService.getToursByDate(parsedDate).stream()
+                .map(tour -> new TourDTO(tour.getName(), tour.getDescription(), tour.getDate(), tour.getPrice(), tour.getMaxParticipants()))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(tours);
     }
-
 }

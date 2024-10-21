@@ -31,7 +31,6 @@ public class TourService {
         return tourRepository.findByDate(date);
     }
 
-
     // Cancella un tour
     public void deleteTour(Long id) {
         if (!tourRepository.existsById(id)) {

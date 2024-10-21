@@ -24,6 +24,10 @@ public class UtenteService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public List<Utente> findAll() {
+        return utenteRepository.findAll();
+    }
+
     public Optional<Utente> findById(Long id) {
         return utenteRepository.findById(id);
     }
