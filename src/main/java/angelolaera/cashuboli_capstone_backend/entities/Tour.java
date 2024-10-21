@@ -13,22 +13,29 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name="tours")
 @ToString
-
 @Entity
 public class Tour {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.NONE)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false, length = 500)
     private String description;
-    private LocalDate date;
+
+    @Column(nullable = false)
+    private LocalDate date;  // Puoi anche considerare l'aggiunta di date di inizio e fine, se richiesto
+
+    @Column(nullable = false)
     private BigDecimal price;
+
+    @Column(nullable = false)
     private int maxParticipants;
 
-    @OneToMany(mappedBy = "tour")
+    @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bicicletta> biciclette;
-
-
 }

@@ -45,6 +45,7 @@ public class UtenteController {
         }
     }
 
+
     // Aggiorna il profilo dell'utente (nome, cognome, password)
     @PutMapping("/profilo")
     public ResponseEntity<Utente> updateProfilo(@AuthenticationPrincipal Utente utente, @RequestBody Utente profiloAggiornato) {

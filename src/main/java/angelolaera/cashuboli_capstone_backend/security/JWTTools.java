@@ -1,6 +1,7 @@
 package angelolaera.cashuboli_capstone_backend.security;
 
 import angelolaera.cashuboli_capstone_backend.entities.Utente;
+import angelolaera.cashuboli_capstone_backend.exceptions.UnauthorizedException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;

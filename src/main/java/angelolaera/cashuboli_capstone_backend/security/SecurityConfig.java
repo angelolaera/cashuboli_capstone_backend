@@ -41,3 +41,4 @@ public class SecurityConfig {
     PasswordEncoder getBCrypt() {
         return new BCryptPasswordEncoder(11);  // Lo stesso encoder del progetto precedente
     }
+}
