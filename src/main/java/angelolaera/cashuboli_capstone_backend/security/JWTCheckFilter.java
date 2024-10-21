@@ -2,6 +2,7 @@ package angelolaera.cashuboli_capstone_backend.security;
 
 import angelolaera.cashuboli_capstone_backend.entities.Utente;
 import angelolaera.cashuboli_capstone_backend.exceptions.UnauthorizedException;
+import angelolaera.cashuboli_capstone_backend.services.UtenteService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,12 +22,12 @@ import java.util.UUID;
 public class JWTCheckFilter extends OncePerRequestFilter {
 
     private final JWTTools jwtTools;
-    private final UserService userService;
+    private final UtenteService utenteService;
 
     @Autowired
-    public JWTCheckFilter(JWTTools jwtTools, UserService userService) {
+    public JWTCheckFilter(JWTTools jwtTools, UtenteService utenteService) {
         this.jwtTools = jwtTools;
-        this.userService = userService;
+        this.utenteService = utenteService;
     }
 
     @Override
@@ -41,7 +42,8 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
         jwtTools.verifyToken(accessToken);
         String id = jwtTools.extractIdFromToken(accessToken);
-        Utente currentUser = userService.findById(UUID.fromString(id));
+        Long userId=Long.parseLong(id);
+        Utente currentUser = utenteService.findById(userId).orElseThrow(()-> new UnauthorizedException("Utente non trovato!"));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);

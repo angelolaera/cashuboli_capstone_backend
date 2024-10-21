@@ -15,7 +15,7 @@ public class PrenotazioneService {
     private PrenotazioneRepository prenotazioneRepository;
 
     public List<Prenotazione> getPrenotazioniByUtente(Long utenteId){
-        return prenotazioneRepository.findUtenteById(utenteId);
+        return prenotazioneRepository.findByUtenteId(utenteId);
     }
 
     public Prenotazione createPrenotazione (Prenotazione prenotazione){
