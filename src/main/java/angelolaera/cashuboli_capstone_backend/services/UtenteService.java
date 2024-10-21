@@ -37,6 +37,12 @@ public class UtenteService {
         return prenotazioneRepository.findByUtenteIdAndDataPrenotazioneAfter(utenteId, dataLimite);
     }
 
+    // Metodo per salvare un nuovo utente
+    public Utente save(Utente utente) {
+        utente.setPassword(passwordEncoder.encode(utente.getPassword()));
+        return utenteRepository.save(utente);
+    }
+
     public Utente updateProfilo(Utente utente, String nuovaPassword) {
         if (nuovaPassword != null && !nuovaPassword.isEmpty()) {
             utente.setPassword(passwordEncoder.encode(nuovaPassword));
