@@ -4,6 +4,7 @@ import angelolaera.cashuboli_capstone_backend.entities.Bicicletta;
 import angelolaera.cashuboli_capstone_backend.services.BiciclettaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class BiciclettaController {
 
     // Crea una nuova bicicletta
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Bicicletta> createBicicletta(@RequestBody Bicicletta bicicletta) {
         Bicicletta nuovaBicicletta = biciclettaService.createBicicletta(bicicletta);
         return ResponseEntity.ok(nuovaBicicletta);
@@ -31,6 +33,7 @@ public class BiciclettaController {
 
     // Aggiorna una bicicletta esistente
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Bicicletta> updateBicicletta(@PathVariable Long id, @RequestBody Bicicletta biciclettaDetails) {
         Bicicletta updatedBicicletta = biciclettaService.updateBicicletta(id, biciclettaDetails);
         return ResponseEntity.ok(updatedBicicletta);
@@ -38,6 +41,7 @@ public class BiciclettaController {
 
     // Cancella una bicicletta
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteBicicletta(@PathVariable Long id) {
         biciclettaService.deleteBicicletta(id);
         return ResponseEntity.noContent().build();
