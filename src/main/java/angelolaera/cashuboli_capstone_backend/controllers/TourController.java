@@ -1,14 +1,18 @@
 package angelolaera.cashuboli_capstone_backend.controllers;
+
 import angelolaera.cashuboli_capstone_backend.entities.Tour;
 import angelolaera.cashuboli_capstone_backend.Payloads.TourDTO;
-import angelolaera.cashuboli_capstone_backend.enums.TourType;
+import angelolaera.cashuboli_capstone_backend.exceptions.BadRequestException;
 import angelolaera.cashuboli_capstone_backend.services.TourService;
 import angelolaera.cashuboli_capstone_backend.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,23 +27,44 @@ public class TourController {
     @GetMapping
     public List<TourDTO> getAllTours() {
         return tourService.getAllTours().stream()
-                .map(tour -> new TourDTO(tour.getName(), tour.getDescription(), tour.getDate(), tour.getPrice(), tour.getMaxParticipants()))
+                .map(tour -> new TourDTO(
+                        tour.getName(),
+                        tour.getDescription(),
+                        tour.getPrice(),
+                        tour.getMaxParticipants(),
+                        tour.getId(),
+                        tour.getImageUrl())) // Aggiungi il campo dell'URL dell'immagine
                 .collect(Collectors.toList());
     }
 
-    // Crea un nuovo tour
+    // Crea un nuovo tour con immagine
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Tour> createTour(@RequestBody TourDTO tourDTO) {
         Tour tour = new Tour();
         tour.setName(tourDTO.name());
         tour.setDescription(tourDTO.description());
-        tour.setDate(tourDTO.date());
         tour.setPrice(tourDTO.price());
         tour.setMaxParticipants(tourDTO.maxParticipants());
 
-        Tour createdTour = tourService.createTour(tour);
-        return ResponseEntity.ok(createdTour);
+        Tour createdTour = tourService.save(tour);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdTour);
     }
+
+    @PostMapping("/{id}/image")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Tour> uploadTourImage(@PathVariable Long id, @RequestParam("image") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new BadRequestException("Il file dell'immagine è obbligatorio.");
+        }
+
+        Tour updatedTour = tourService.uploadImage(id, file);
+        return ResponseEntity.ok(updatedTour);
+    }
+
+
 
     // Cancella un tour esistente
     @DeleteMapping("/{id}")
@@ -54,29 +79,19 @@ public class TourController {
 
     // Aggiorna un tour esistente
     @PutMapping("/{id}")
-    public ResponseEntity<Tour> updateTour(@PathVariable Long id, @RequestBody TourDTO tourDTO) {
-        try {
-            Tour tour = new Tour();
-            tour.setName(TourType.valueOf(String.valueOf(tourDTO.name())));
-            tour.setDescription(tourDTO.description());
-            tour.setDate(tourDTO.date());
-            tour.setPrice(tourDTO.price());
-            tour.setMaxParticipants(tourDTO.maxParticipants());
+    public ResponseEntity<Tour> updateTour(
+            @PathVariable Long id,
+            @RequestPart("tour") TourDTO tourDTO,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
-            Tour updatedTour = tourService.updateTour(id, tour);
-            return ResponseEntity.ok(updatedTour);
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+        Tour tour = new Tour();
+        tour.setName(tourDTO.name());
+        tour.setDescription(tourDTO.description());
+        tour.setPrice(tourDTO.price());
+        tour.setMaxParticipants(tourDTO.maxParticipants());
 
-    // Trova tour per data
-    @GetMapping("/date/{date}")
-    public ResponseEntity<List<TourDTO>> getToursByDate(@PathVariable String date) {
-        LocalDate parsedDate = LocalDate.parse(date);
-        List<TourDTO> tours = tourService.getToursByDate(parsedDate).stream()
-                .map(tour -> new TourDTO(tour.getName(), tour.getDescription(), tour.getDate(), tour.getPrice(), tour.getMaxParticipants()))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(tours);
+        // Passa l'immagine al service per la gestione
+        Tour updatedTour = tourService.updateTour(id, tour, image);
+        return ResponseEntity.ok(updatedTour);
     }
 }

@@ -31,6 +31,11 @@ public class PrenotazioneService {
     @Autowired
     private BiciclettaRepository biciclettaRepository;
 
+    //Torna tutte le prenotazioni
+    public List<Prenotazione> getAllPrenotazioni() {
+        return prenotazioneRepository.findAll();
+    }
+
     // Crea una nuova prenotazione
     public Prenotazione createPrenotazione(PrenotazioneDTO prenotazioneDTO, Utente utente) {
         // Recupera il tour collegato alla prenotazione

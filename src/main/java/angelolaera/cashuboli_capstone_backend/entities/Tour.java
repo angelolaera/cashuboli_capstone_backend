@@ -22,21 +22,22 @@ public class Tour {
     @Setter(AccessLevel.NONE)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
+
     @Column(nullable = false)
-    private TourType name;
+    private String name;
 
     @Column(nullable = false, length = 500)
     private String description;
-
-    @Column(nullable = false)
-    private LocalDate date;
 
     @Column(nullable = false)
     private BigDecimal price;
 
     @Column(nullable = false)
     private int maxParticipants;
+
+    @Column(nullable = true)
+    private String imageUrl;
+
 
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bicicletta> biciclette;

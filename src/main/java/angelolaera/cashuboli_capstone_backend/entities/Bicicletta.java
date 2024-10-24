@@ -21,6 +21,10 @@ public class Bicicletta {
     private String tipo;  // e-bike, standard, per disabili
     private boolean disponibilita;
 
+    @Column(nullable = true)
+    private String imageUrl;
+
+
     @ManyToOne
     @JoinColumn(name = "tour_id")
     private Tour tour;

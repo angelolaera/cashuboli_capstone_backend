@@ -31,7 +31,9 @@ public class AuthService {
         if (bcrypt.matches(body.password(), found.getPassword())) {
             // Genera il token JWT
             String token = jwtTools.createToken(found);
-            return new UserLoginRespDTO(token, found.getNome(), found.getEmail());
+
+            // Restituisci anche il ruolo dell'utente
+            return new UserLoginRespDTO(token, found.getNome(), found.getEmail(), found.getRuolo().name());
         } else {
             throw new UnauthorizedException("Credenziali errate!");
         }

@@ -1,11 +1,13 @@
 package angelolaera.cashuboli_capstone_backend.controllers;
 
 import angelolaera.cashuboli_capstone_backend.Payloads.PrenotazioneDTO;
+import angelolaera.cashuboli_capstone_backend.entities.Bicicletta;
 import angelolaera.cashuboli_capstone_backend.entities.Prenotazione;
 import angelolaera.cashuboli_capstone_backend.entities.Utente;
 import angelolaera.cashuboli_capstone_backend.services.PrenotazioneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,13 @@ public class PrenotazioneController {
 
     @Autowired
     private PrenotazioneService prenotazioneService;
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Prenotazione>> getAllPrenotazioni() {
+        List<Prenotazione> prenotazioni = prenotazioneService.getAllPrenotazioni();
+        return ResponseEntity.ok(prenotazioni);
+    }
 
     // Ottiene tutte le prenotazioni dell'utente autenticato
     @GetMapping("/user/{utenteId}")

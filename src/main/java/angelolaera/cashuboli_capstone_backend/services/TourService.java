@@ -2,12 +2,16 @@ package angelolaera.cashuboli_capstone_backend.services;
 
 import angelolaera.cashuboli_capstone_backend.entities.Tour;
 import angelolaera.cashuboli_capstone_backend.repositories.TourRepository;
-import angelolaera.cashuboli_capstone_backend.exceptions.NotFoundException;  // Assumendo che tu abbia una eccezione personalizzata
+import angelolaera.cashuboli_capstone_backend.exceptions.NotFoundException;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -16,20 +20,38 @@ public class TourService {
     @Autowired
     private TourRepository tourRepository;
 
+    @Autowired
+    private Cloudinary cloudinary;
+
     // Restituisce tutti i tour
     public List<Tour> getAllTours() {
         return tourRepository.findAll();
     }
 
-    // Crea un nuovo tour
-    public Tour createTour(Tour tour) {
+    public Tour save(Tour tour) {
         return tourRepository.save(tour);
     }
 
-    // Trova tour per data
-    public List<Tour> getToursByDate(LocalDate date) {
-        return tourRepository.findByDate(date);
+    public Tour uploadImage(Long id, MultipartFile file) throws IOException {
+        Optional<Tour> optionalTour = tourRepository.findById(id);
+
+        if (optionalTour.isEmpty()) {
+            throw new NotFoundException("Tour con ID " + id + " non trovato.");
+        }
+
+        Tour tour = optionalTour.get();
+
+        // Caricamento immagine su Cloudinary (o qualsiasi servizio usi)
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        String imageUrl = (String) uploadResult.get("url");
+
+        // Aggiorna l'URL dell'immagine nel tour
+        tour.setImageUrl(imageUrl);
+
+        return tourRepository.save(tour);
     }
+
+
 
     // Cancella un tour
     public void deleteTour(Long id) {
@@ -40,7 +62,7 @@ public class TourService {
     }
 
     // Aggiorna un tour esistente
-    public Tour updateTour(Long id, Tour tourDetails) {
+    public Tour updateTour(Long id, Tour tourDetails, MultipartFile image) {
         Optional<Tour> optionalTour = tourRepository.findById(id);
 
         if (optionalTour.isEmpty()) {
@@ -50,10 +72,14 @@ public class TourService {
         Tour existingTour = optionalTour.get();
         existingTour.setName(tourDetails.getName());
         existingTour.setDescription(tourDetails.getDescription());
-        existingTour.setDate(tourDetails.getDate());
         existingTour.setPrice(tourDetails.getPrice());
         existingTour.setMaxParticipants(tourDetails.getMaxParticipants());
 
-        return tourRepository.save(existingTour);
+        // Aggiorna l'immagine se è stata fornita nel controller e salvata nel tourDetails
+        if (tourDetails.getImageUrl() != null) {
+            existingTour.setImageUrl(tourDetails.getImageUrl());
+        }
+
+        return tourRepository.save(existingTour); // Salva il tour aggiornato
     }
 }

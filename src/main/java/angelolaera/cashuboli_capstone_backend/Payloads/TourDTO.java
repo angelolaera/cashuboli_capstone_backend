@@ -3,13 +3,14 @@ package angelolaera.cashuboli_capstone_backend.Payloads;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 
 public record TourDTO(
-        angelolaera.cashuboli_capstone_backend.enums.TourType name,
+        @NotNull String name,
         @NotNull String description,
-        @NotNull LocalDate date,
         @NotNull BigDecimal price,
-        @NotNull int maxParticipants
+        @NotNull int maxParticipants,
+        @NotNull Long id,
+        String imageUrl
 ) {}
 
