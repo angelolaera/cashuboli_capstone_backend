@@ -24,6 +24,8 @@ public class Bicicletta {
     @Column(nullable = true)
     private String imageUrl;
 
+    @Column(nullable = false)
+    private String descrizione;
 
     @ManyToOne
     @JoinColumn(name = "tour_id")
