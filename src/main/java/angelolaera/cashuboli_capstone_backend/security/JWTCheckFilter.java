@@ -16,7 +16,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Component
 public class JWTCheckFilter extends OncePerRequestFilter {
@@ -34,16 +33,16 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
+        // Se manca il token o non è valido
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new UnauthorizedException("Per favore inserisci correttamente il token nell'Authorization Header");
         }
 
         String accessToken = authHeader.substring(7);
-
         jwtTools.verifyToken(accessToken);
         String id = jwtTools.extractIdFromToken(accessToken);
-        Long userId=Long.parseLong(id);
-        Utente currentUser = utenteService.findById(userId).orElseThrow(()-> new UnauthorizedException("Utente non trovato!"));
+        Long userId = Long.parseLong(id);
+        Utente currentUser = utenteService.findById(userId).orElseThrow(() -> new UnauthorizedException("Utente non trovato!"));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -53,6 +52,21 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return new AntPathMatcher().match("/auth/**", request.getServletPath());
+        String path = request.getServletPath();
+        String method = request.getMethod();
+        AntPathMatcher matcher = new AntPathMatcher();
+
+        // Rotte pubbliche per autenticazione e accesso aperto
+        if (matcher.match("/auth/**", path)) {
+            return true;
+        }
+
+        // Accesso pubblico solo alle richieste GET per tours e biciclette
+        if ((matcher.match("/api/tours", path) || matcher.match("/api/biciclette", path)) && method.equals("GET")) {
+            return true;
+        }
+
+        // Tutte le altre richieste richiedono autenticazione
+        return false;
     }
 }

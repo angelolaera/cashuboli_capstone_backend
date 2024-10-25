@@ -1,7 +1,8 @@
 package angelolaera.cashuboli_capstone_backend.security;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,43 +18,41 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JWTCheckFilter jwtCheckFilter) throws Exception {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
-
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))  //Abilita CORS con configurazione
-
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()  // Accesso aperto per autenticazione e registrazione
-                        .anyRequest().authenticated()  // Richiede autenticazione per tutte le altre richieste
+                        .requestMatchers("/auth/**").permitAll() // Accesso aperto per autenticazione e registrazione
+                        .requestMatchers(HttpMethod.GET, "/api/tours", "/api/biciclette").permitAll() // Accesso pubblico solo alle chiamate GET
+                        .requestMatchers(HttpMethod.POST, "/api/tours/**", "/api/biciclette/**").hasRole("ADMIN") // CRUD solo per admin
+                        .anyRequest().authenticated() // Richiede autenticazione per altre richieste
                 )
-                .addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class); // Filtro JWT
 
         return httpSecurity.build();
     }
 
     @Bean
     PasswordEncoder getBCrypt() {
-        return new BCryptPasswordEncoder(11);  // Lo stesso encoder del progetto precedente
+        return new BCryptPasswordEncoder();
     }
 
-    // Configurazione CORS
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));  // Aggiungi il dominio del frontend
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));  // Permetti vari metodi
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));  // Permetti specifici header
-        configuration.setAllowCredentials(true);  // Permetti invio di credenziali come i cookie
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization")); // Espone l'header Authorization
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);  // Applica a tutte le rotte
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +23,6 @@ public class TourController {
     @Autowired
     private TourService tourService;
 
-    // Visualizza tutti i tour
     @GetMapping
     public List<TourDTO> getAllTours() {
         return tourService.getAllTours().stream()
@@ -42,10 +42,8 @@ public class TourController {
                 .collect(Collectors.toList());
     }
 
-    // Crea un nuovo tour con immagine
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Tour> createTour(@RequestBody TourDTO tourDTO) {
         Tour tour = new Tour();
         tour.setName(tourDTO.name());
@@ -62,19 +60,17 @@ public class TourController {
     }
 
     @PostMapping("/{id}/image")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Tour> uploadTourImage(@PathVariable Long id, @RequestParam("image") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new BadRequestException("Il file dell'immagine è obbligatorio.");
         }
-
         Tour updatedTour = tourService.uploadImage(id, file);
         return ResponseEntity.ok(updatedTour);
     }
 
-    // Cancella un tour esistente
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteTour(@PathVariable Long id) {
         try {
             tourService.deleteTour(id);
@@ -84,8 +80,8 @@ public class TourController {
         }
     }
 
-    // Aggiorna un tour esistente
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Tour> updateTour(
             @PathVariable Long id,
             @RequestPart("tour") TourDTO tourDTO,
@@ -102,7 +98,6 @@ public class TourController {
         tour.setDescrizioneCompleta(tourDTO.descrizioneCompleta());
         tour.setAccessoriInclusi(tourDTO.accessoriInclusi());
 
-        // Passa l'immagine al service per la gestione
         Tour updatedTour = tourService.updateTour(id, tour, image);
         return ResponseEntity.ok(updatedTour);
     }
