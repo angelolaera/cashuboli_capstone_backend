@@ -11,6 +11,11 @@ public record TourDTO(
         @NotNull BigDecimal price,
         @NotNull int maxParticipants,
         @NotNull Long id,
-        String imageUrl
+        String imageUrl,
+        double lunghezzaItinerario,
+        String tempoMedioPercorrenza,
+        String linguaAccoglienza,
+        String descrizioneCompleta,
+        String accessoriInclusi
 ) {}
 

@@ -51,8 +51,6 @@ public class TourService {
         return tourRepository.save(tour);
     }
 
-
-
     // Cancella un tour
     public void deleteTour(Long id) {
         if (!tourRepository.existsById(id)) {
@@ -62,7 +60,7 @@ public class TourService {
     }
 
     // Aggiorna un tour esistente
-    public Tour updateTour(Long id, Tour tourDetails, MultipartFile image) {
+    public Tour updateTour(Long id, Tour tourDetails, MultipartFile image) throws IOException {
         Optional<Tour> optionalTour = tourRepository.findById(id);
 
         if (optionalTour.isEmpty()) {
@@ -74,10 +72,17 @@ public class TourService {
         existingTour.setDescription(tourDetails.getDescription());
         existingTour.setPrice(tourDetails.getPrice());
         existingTour.setMaxParticipants(tourDetails.getMaxParticipants());
+        existingTour.setLunghezzaItinerario(tourDetails.getLunghezzaItinerario());
+        existingTour.setTempoMedioPercorrenza(tourDetails.getTempoMedioPercorrenza());
+        existingTour.setLinguaAccoglienza(tourDetails.getLinguaAccoglienza());
+        existingTour.setDescrizioneCompleta(tourDetails.getDescrizioneCompleta());
+        existingTour.setAccessoriInclusi(tourDetails.getAccessoriInclusi());
 
-        // Aggiorna l'immagine se è stata fornita nel controller e salvata nel tourDetails
-        if (tourDetails.getImageUrl() != null) {
-            existingTour.setImageUrl(tourDetails.getImageUrl());
+        // Aggiorna l'immagine se è stata fornita nel controller
+        if (image != null && !image.isEmpty()) {
+            Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+            String imageUrl = (String) uploadResult.get("url");
+            existingTour.setImageUrl(imageUrl);
         }
 
         return tourRepository.save(existingTour); // Salva il tour aggiornato

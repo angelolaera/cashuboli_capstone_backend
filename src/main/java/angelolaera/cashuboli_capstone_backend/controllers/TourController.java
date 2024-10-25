@@ -3,15 +3,14 @@ package angelolaera.cashuboli_capstone_backend.controllers;
 import angelolaera.cashuboli_capstone_backend.entities.Tour;
 import angelolaera.cashuboli_capstone_backend.Payloads.TourDTO;
 import angelolaera.cashuboli_capstone_backend.exceptions.BadRequestException;
-import angelolaera.cashuboli_capstone_backend.services.TourService;
 import angelolaera.cashuboli_capstone_backend.exceptions.NotFoundException;
+import angelolaera.cashuboli_capstone_backend.services.TourService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +32,13 @@ public class TourController {
                         tour.getPrice(),
                         tour.getMaxParticipants(),
                         tour.getId(),
-                        tour.getImageUrl())) // Aggiungi il campo dell'URL dell'immagine
+                        tour.getImageUrl(),
+                        tour.getLunghezzaItinerario(),
+                        tour.getTempoMedioPercorrenza(),
+                        tour.getLinguaAccoglienza(),
+                        tour.getDescrizioneCompleta(),
+                        tour.getAccessoriInclusi()
+                ))
                 .collect(Collectors.toList());
     }
 
@@ -47,7 +52,11 @@ public class TourController {
         tour.setDescription(tourDTO.description());
         tour.setPrice(tourDTO.price());
         tour.setMaxParticipants(tourDTO.maxParticipants());
-
+        tour.setLunghezzaItinerario(tourDTO.lunghezzaItinerario());
+        tour.setTempoMedioPercorrenza(tourDTO.tempoMedioPercorrenza());
+        tour.setLinguaAccoglienza(tourDTO.linguaAccoglienza());
+        tour.setDescrizioneCompleta(tourDTO.descrizioneCompleta());
+        tour.setAccessoriInclusi(tourDTO.accessoriInclusi());
         Tour createdTour = tourService.save(tour);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTour);
     }
@@ -63,8 +72,6 @@ public class TourController {
         Tour updatedTour = tourService.uploadImage(id, file);
         return ResponseEntity.ok(updatedTour);
     }
-
-
 
     // Cancella un tour esistente
     @DeleteMapping("/{id}")
@@ -89,6 +96,11 @@ public class TourController {
         tour.setDescription(tourDTO.description());
         tour.setPrice(tourDTO.price());
         tour.setMaxParticipants(tourDTO.maxParticipants());
+        tour.setLunghezzaItinerario(tourDTO.lunghezzaItinerario());
+        tour.setTempoMedioPercorrenza(tourDTO.tempoMedioPercorrenza());
+        tour.setLinguaAccoglienza(tourDTO.linguaAccoglienza());
+        tour.setDescrizioneCompleta(tourDTO.descrizioneCompleta());
+        tour.setAccessoriInclusi(tourDTO.accessoriInclusi());
 
         // Passa l'immagine al service per la gestione
         Tour updatedTour = tourService.updateTour(id, tour, image);

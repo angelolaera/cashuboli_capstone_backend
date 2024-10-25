@@ -38,6 +38,20 @@ public class Tour {
     @Column(nullable = true)
     private String imageUrl;
 
+    @Column(nullable = false)
+    private double lunghezzaItinerario;
+
+    @Column(nullable = false)
+    private String tempoMedioPercorrenza;
+
+    @Column(nullable = false)
+    private String linguaAccoglienza;
+
+    @Column(nullable = false, length = 1000)
+    private String descrizioneCompleta;
+
+    @Column(nullable = true)
+    private String accessoriInclusi;
 
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bicicletta> biciclette;
