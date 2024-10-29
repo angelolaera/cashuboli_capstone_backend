@@ -32,8 +32,8 @@ public class AuthService {
             // Genera il token JWT
             String token = jwtTools.createToken(found);
 
-            // Restituisci anche il ruolo dell'utente
-            return new UserLoginRespDTO(token, found.getNome(), found.getEmail(), found.getRuolo().name());
+            // Restituisci anche l'ID e il ruolo dell'utente
+            return new UserLoginRespDTO(token, found.getNome(), found.getEmail(), found.getRuolo().name(), found.getId());
         } else {
             throw new UnauthorizedException("Credenziali errate!");
         }
