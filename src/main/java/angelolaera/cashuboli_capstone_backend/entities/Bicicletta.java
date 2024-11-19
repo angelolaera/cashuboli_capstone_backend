@@ -33,3 +33,6 @@ public class Bicicletta {
 
 
 }
+
+
+//file:/var/www/cashuboli-backend/env.properties

@@ -45,3 +45,5 @@ public class Prenotazione {
     @Enumerated(EnumType.STRING) // Aggiungi questo se non presente
     private StatoPrenotazione stato;  // Campo stato per memorizzare lo stato della prenotazione
 }
+
+
