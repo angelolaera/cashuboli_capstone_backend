@@ -11,6 +11,7 @@ import angelolaera.cashuboli_capstone_backend.services.AuthService;
 import angelolaera.cashuboli_capstone_backend.services.UtenteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -58,6 +59,18 @@ public class AuthController {
             Utente savedUtente = this.utenteService.save(utente);
 
             return new NewUserRespDTO(savedUtente.getId());
+        }
+    }
+
+
+    // Endpoint per la verifica dell'email
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
+        boolean isVerified = utenteService.verifyEmail(token);
+        if (isVerified) {
+            return ResponseEntity.ok("Email verificata con successo! Ora puoi effettuare il login.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Verifica email fallita. Token non valido o scaduto.");
         }
     }
 }

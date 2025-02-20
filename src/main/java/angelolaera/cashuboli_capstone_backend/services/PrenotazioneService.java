@@ -31,41 +31,63 @@ public class PrenotazioneService {
     @Autowired
     private BiciclettaRepository biciclettaRepository;
 
-    //Torna tutte le prenotazioni
+    // Torna tutte le prenotazioni
     public List<Prenotazione> getAllPrenotazioni() {
-        return prenotazioneRepository.findAll();
+        List<Prenotazione> prenotazioni = prenotazioneRepository.findAll();
+
+        if (prenotazioni.isEmpty()) {
+            System.out.println("⚠️ Nessuna prenotazione trovata.");
+        }
+
+        System.out.println("📤 Dati inviati al frontend: " + prenotazioni);
+        return prenotazioni;
     }
 
     // Crea una nuova prenotazione
     public Prenotazione createPrenotazione(PrenotazioneDTO prenotazioneDTO, Utente utente) {
-        // Recupera il tour collegato alla prenotazione
+        System.out.println("📥 Dati ricevuti nel backend: " + prenotazioneDTO);
+
+        if (prenotazioneDTO.tourId() == null) {
+            throw new IllegalArgumentException("❌ Errore: tourId è null");
+        }
+        if (prenotazioneDTO.biciclettaId() == null) {
+            throw new IllegalArgumentException("❌ Errore: biciclettaId è null");
+        }
+        if (prenotazioneDTO.numeroBiciclettePrenotate() <= 0) {
+            throw new IllegalArgumentException("❌ Errore: numero di biciclette non valido");
+        }
+
         Optional<Tour> tourOptional = tourRepository.findById(prenotazioneDTO.tourId());
         if (tourOptional.isEmpty()) {
             throw new IllegalArgumentException("Tour non trovato");
         }
         Tour tour = tourOptional.get();
 
-        // Recupera la bicicletta selezionata
         Optional<Bicicletta> biciclettaOptional = biciclettaRepository.findById(prenotazioneDTO.biciclettaId());
         if (biciclettaOptional.isEmpty()) {
             throw new IllegalArgumentException("Bicicletta non trovata");
         }
         Bicicletta bicicletta = biciclettaOptional.get();
 
-        // Calcola il prezzo totale (numero di biciclette * prezzo del tour)
         BigDecimal totalePrezzo = tour.getPrice().multiply(BigDecimal.valueOf(prenotazioneDTO.numeroBiciclettePrenotate()));
 
-        // Crea la nuova prenotazione
         Prenotazione prenotazione = new Prenotazione();
         prenotazione.setUtente(utente);
         prenotazione.setTour(tour);
         prenotazione.setNumeroBiciclettePrenotate(prenotazioneDTO.numeroBiciclettePrenotate());
-        prenotazione.setBicicletta(bicicletta);  // Assegna la bicicletta
+        prenotazione.setBicicletta(bicicletta);
         prenotazione.setTotalePrezzo(totalePrezzo);
         prenotazione.setDataPrenotazione(LocalDate.now());
+        // **Aggiunto salvataggio di email e telefono**
+        prenotazione.setEmail(prenotazioneDTO.email());
+        prenotazione.setTelefono(prenotazioneDTO.telefono());
+        // **Aggiunto campo informazioni aggiuntive**
+        prenotazione.setInformazioniAggiuntive(prenotazioneDTO.informazioniAggiuntive());
 
         return prenotazioneRepository.save(prenotazione);
     }
+
+
 
     // Recupera tutte le prenotazioni di un determinato utente
     public List<Prenotazione> getPrenotazioniByUtente(Long utenteId) {
@@ -85,6 +107,18 @@ public class PrenotazioneService {
             Prenotazione prenotazione = prenotazioneOptional.get();
             prenotazione.setStato(StatoPrenotazione.CANCELLATA);
             prenotazioneRepository.save(prenotazione);
+        } else {
+            throw new IllegalArgumentException("Prenotazione non trovata");
+        }
+    }
+
+    // Conferma la prenotazione aggiornando lo stato a "CONFERMATA"
+    public Prenotazione confermaPrenotazione(Long id) {
+        Optional<Prenotazione> prenotazioneOptional = prenotazioneRepository.findById(id);
+        if (prenotazioneOptional.isPresent()) {
+            Prenotazione prenotazione = prenotazioneOptional.get();
+            prenotazione.setStato(StatoPrenotazione.CONFERMATA);
+            return prenotazioneRepository.save(prenotazione);
         } else {
             throw new IllegalArgumentException("Prenotazione non trovata");
         }

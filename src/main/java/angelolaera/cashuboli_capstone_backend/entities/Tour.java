@@ -26,7 +26,7 @@ public class Tour {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, length = 10000)
     private String description;
 
     @Column(nullable = false)
@@ -47,7 +47,7 @@ public class Tour {
     @Column(nullable = false)
     private String linguaAccoglienza;
 
-    @Column(nullable = false, length = 1000)
+    @Column(nullable = false, length = 10000)
     private String descrizioneCompleta;
 
     @Column(nullable = true)

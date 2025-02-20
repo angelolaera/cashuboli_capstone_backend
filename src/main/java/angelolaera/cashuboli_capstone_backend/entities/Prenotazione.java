@@ -1,6 +1,7 @@
 package angelolaera.cashuboli_capstone_backend.entities;
 
 import angelolaera.cashuboli_capstone_backend.enums.StatoPrenotazione;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,10 +12,11 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "prenotazioni")
 @ToString
 
 @Entity
+@Table(name = "prenotazioni")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // 🚀 Evita errori di serializzazione
 public class Prenotazione {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,8 +44,15 @@ public class Prenotazione {
     @Column(nullable = false)
     private BigDecimal totalePrezzo;
 
-    @Enumerated(EnumType.STRING) // Aggiungi questo se non presente
-    private StatoPrenotazione stato;  // Campo stato per memorizzare lo stato della prenotazione
+    @Enumerated(EnumType.STRING)
+    private StatoPrenotazione stato;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String telefono;
+
+    @Column (columnDefinition = "TEXT")
+    private String informazioniAggiuntive;
 }
-
-

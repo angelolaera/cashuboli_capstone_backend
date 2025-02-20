@@ -37,11 +37,18 @@ public class Utente implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Setter
+    @Column(nullable = false)
+    private boolean enabled = false;
+
+
     @JsonIgnore
     @Column(nullable = false)
     private String password;
 
     private String avatar;
+
+
 
     @Enumerated(EnumType.STRING)
     private Ruolo ruolo = Ruolo.USER;
