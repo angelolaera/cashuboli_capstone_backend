@@ -30,6 +30,11 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll() // Accesso aperto per autenticazione e registrazione
+                        .requestMatchers(
+                                "/api/healthcheck",  // Aggiungi questo
+                                "/auth/**",
+                                "/actuator/health"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tours", "/api/biciclette").permitAll() // Accesso pubblico solo alle chiamate GET
                         .requestMatchers(HttpMethod.POST, "/api/tours/**", "/api/biciclette/**").hasRole("ADMIN") // CRUD solo per admin
                         .anyRequest().authenticated() // Richiede autenticazione per altre richieste
@@ -47,11 +52,14 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://www.cashuboli.it","http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("https://cashuboli.it", "http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setExposedHeaders(Arrays.asList("Authorization")); // Espone l'header Authorization
         configuration.setAllowCredentials(true);
+
+        // DEBUG
+        System.out.println("✅ CORS configurato con allowedOrigins: " + configuration.getAllowedOrigins());
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -61,7 +69,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://www.cashuboli.it","http://localhost:3000")
+                .allowedOrigins("https://cashuboli.it", "http://localhost:3000")
                 .allowedMethods("GET", "POST", "PUT","DELETE", "PATCH");
     }
 }
