@@ -21,6 +21,7 @@ public class ExceptionsHandler {
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorsPayload handleForbidden(AccessDeniedException ex) {
+        System.out.println("🔥 AccessDeniedException intercettata: " + ex.getMessage());
         ErrorsPayload errors = new ErrorsPayload("Non hai i permessi per accedere a questa risorsa.");
         errors.addError("timestamp", LocalDateTime.now().toString());
         return errors;

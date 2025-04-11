@@ -8,19 +8,17 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig implements WebMvcConfigurer {
+public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JWTCheckFilter jwtCheckFilter) throws Exception {
@@ -29,17 +27,15 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() // Accesso aperto per autenticazione e registrazione
-                        .requestMatchers(
-                                "/api/healthcheck",  // Aggiungi questo
-                                "/auth/**",
-                                "/actuator/health"
-                        ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/tours", "/api/biciclette").permitAll() // Accesso pubblico solo alle chiamate GET
-                        .requestMatchers(HttpMethod.POST, "/api/tours/**", "/api/biciclette/**").hasRole("ADMIN") // CRUD solo per admin
-                        .anyRequest().authenticated() // Richiede autenticazione per altre richieste
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 🔥 PER I CORS
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/healthcheck", "/actuator/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tours", "/api/biciclette").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/tours/**", "/api/biciclette/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class); // Filtro JWT
+                .addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
+        System.out.println("🔐 Filtro JWT iniettato e configurato correttamente.");
 
         return httpSecurity.build();
     }
@@ -52,24 +48,17 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://cashuboli.it", "http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization")); // Espone l'header Authorization
-        configuration.setAllowCredentials(true);
 
-        // DEBUG
-        System.out.println("✅ CORS configurato con allowedOrigins: " + configuration.getAllowedOrigins());
+        // 🔥 NIENTE SLASH FINALE!
+        configuration.setAllowedOrigins(Arrays.asList("https://cashuboli.it", "https://www.cashuboli.it", "http://localhost:3000"));
+
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*")); // tutti gli header permessi
+        configuration.setExposedHeaders(Arrays.asList("Authorization")); // se usi bearer token
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("https://cashuboli.it", "http://localhost:3000")
-                .allowedMethods("GET", "POST", "PUT","DELETE", "PATCH");
     }
 }

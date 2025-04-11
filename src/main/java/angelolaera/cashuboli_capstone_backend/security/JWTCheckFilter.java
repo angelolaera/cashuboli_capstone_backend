@@ -54,19 +54,20 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getServletPath();
         String method = request.getMethod();
-        AntPathMatcher matcher = new AntPathMatcher();
 
-        // Rotte pubbliche per autenticazione e accesso aperto
-        if (matcher.match("/auth/**", path)) {
+        System.out.println("🌐 PATH RICHIESTO: " + path);
+
+        // Salta il filtro per tutte le richieste a /auth
+        if (path.startsWith("/auth")) {
+            System.out.println("⛔ SKIP JWT per " + path);
             return true;
         }
 
-        // Accesso pubblico solo alle richieste GET per tours e biciclette
-        if ((matcher.match("/api/tours", path) || matcher.match("/api/biciclette", path)) && method.equals("GET")) {
+        // Accesso pubblico per alcune GET
+        if ((path.equals("/api/tours") || path.equals("/api/biciclette")) && method.equals("GET")) {
             return true;
         }
 
-        // Tutte le altre richieste richiedono autenticazione
         return false;
     }
 }

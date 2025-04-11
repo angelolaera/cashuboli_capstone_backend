@@ -63,14 +63,5 @@ public class AuthController {
     }
 
 
-    // Endpoint per la verifica dell'email
-    @GetMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
-        boolean isVerified = utenteService.verifyEmail(token);
-        if (isVerified) {
-            return ResponseEntity.ok("Email verificata con successo! Ora puoi effettuare il login.");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Verifica email fallita. Token non valido o scaduto.");
-        }
-    }
+
 }

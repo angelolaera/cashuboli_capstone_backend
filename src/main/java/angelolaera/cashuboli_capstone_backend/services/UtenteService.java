@@ -1,35 +1,28 @@
 package angelolaera.cashuboli_capstone_backend.services;
-
 import angelolaera.cashuboli_capstone_backend.entities.Utente;
 import angelolaera.cashuboli_capstone_backend.entities.Prenotazione;
-import angelolaera.cashuboli_capstone_backend.entities.VerificationToken;
 import angelolaera.cashuboli_capstone_backend.repositories.UtenteRepository;
 import angelolaera.cashuboli_capstone_backend.repositories.PrenotazioneRepository;
-import angelolaera.cashuboli_capstone_backend.repositories.VerificationTokenRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+
 
 @Service
 public class UtenteService {
 
     private final UtenteRepository utenteRepository;
     private final PrenotazioneRepository prenotazioneRepository;
-    private final VerificationTokenRepository tokenRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
-    public UtenteService(UtenteRepository utenteRepository, PrenotazioneRepository prenotazioneRepository,
-                         VerificationTokenRepository tokenRepository, EmailService emailService,
-                         PasswordEncoder passwordEncoder) {
+    public UtenteService(UtenteRepository utenteRepository, PrenotazioneRepository prenotazioneRepository, EmailService emailService, PasswordEncoder passwordEncoder) {
         this.utenteRepository = utenteRepository;
         this.prenotazioneRepository = prenotazioneRepository;
-        this.tokenRepository = tokenRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -51,6 +44,9 @@ public class UtenteService {
         return prenotazioneRepository.findByUtenteIdAndDataPrenotazioneAfter(utenteId, dataLimite);
     }
 
+    @Value("${app.frontend.base-url}")
+    private String frontendBaseUrl;
+
     @Transactional
     public Utente save(Utente utente) {
         if (utenteRepository.existsByEmail(utente.getEmail())) {
@@ -61,33 +57,16 @@ public class UtenteService {
         utente.setEnabled(false); // L'utente è disabilitato fino alla verifica
         Utente savedUser = utenteRepository.save(utente);
 
-        // Genera il token di verifica
-        String token = UUID.randomUUID().toString();
-        VerificationToken verificationToken = new VerificationToken(token, savedUser, LocalDateTime.now().plusHours(24));
-        tokenRepository.save(verificationToken);
+
 
         // Invia email di verifica con il link
-        String verificationLink = "http://localhost:8080/api/auth/verify-email?token=" + token;
-        emailService.sendVerificationEmail(utente.getEmail(), utente.getNome(), verificationLink);
+        String welcomeEmailLink = frontendBaseUrl;
+        emailService.sendWelcomeEmail(utente.getEmail(), utente.getNome(), welcomeEmailLink);
+
 
         return savedUser;
     }
 
-    @Transactional
-    public boolean verifyEmail(String token) {
-        VerificationToken verificationToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Token non valido o scaduto"));
-
-        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Token scaduto! Richiedi una nuova verifica.");
-        }
-
-        Utente user = verificationToken.getUtente();
-        user.setEnabled(true);
-        utenteRepository.save(user);
-        tokenRepository.delete(verificationToken);
-        return true;
-    }
 
     public Utente updateProfilo(Utente utente, String nuovaPassword) {
         if (nuovaPassword != null && !nuovaPassword.isEmpty()) {

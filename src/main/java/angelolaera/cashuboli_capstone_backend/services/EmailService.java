@@ -11,26 +11,30 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
-    private String fromEmail;
+
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
-    public void sendVerificationEmail(String toEmail, String userName, String verificationLink) {
+    public void sendWelcomeEmail(String toEmail, String userName, String welcomeLink) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setFrom(fromEmail);
-            helper.setTo(toEmail);
-            helper.setSubject("Conferma la tua email per Cashuboli");
-            helper.setText("<h1>Ciao " + userName + "!</h1>"
-                    + "<p>Grazie per la registrazione! Clicca il link qui sotto per verificare il tuo account:</p>"
-                    + "<p><a href='" + verificationLink + "'>Verifica Email</a></p>"
-                    + "<p>Il link è valido per 24 ore.</p>", true);
 
+            helper.setTo(toEmail);
+            helper.setSubject("🎉 Benvenuto in Cashuboli, " + userName + "!");
+            String emailContent = "<div style='font-family: Sanchez, sans-serif; color: #590f18; padding: 20px;'>"
+                    + "<h2 style='color: #4CAF50;'>Ciao " + userName + " 👋</h2>"
+                    + "<p>Grazie per esserti unito a <strong>Cashuboli</strong>! Siamo felici di averti con noi 🌟</p>"
+                    + "<p>Da oggi puoi accedere al tuo account e iniziare a scoprire tutte le funzionalità che abbiamo pensato per te.</p>"
+                    + "<p style='margin-top: 30px;'>"
+                    + "Accedi al tuo account</a></p>"
+                    + "<p style='margin-top: 40px;'>Esplora il nostro mondo,<br><strong>Vivi Cashuboli!</strong></p>"
+                    + "</div>";
+
+            helper.setText(emailContent, true);
             mailSender.send(message);
         } catch (Exception e) {
             e.printStackTrace();
